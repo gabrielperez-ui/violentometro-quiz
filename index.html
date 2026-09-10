@@ -8,8 +8,532 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #120816;
+      --bg-card: #1c1024;
+      --bg-soft: #26152f;
+      --ink: #f7eef8;
+      --muted: #c7b0cc;
+      --line: rgba(255,255,255,.08);
+      --yellow: #f5c542;
+      --orange: #f08a3a;
+      --red: #e23d4a;
+      --violet: #b84fd4;
+      --ok: #3dd68c;
+      --bad: #ff6b7a;
+      --shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    body {
+      font-family: "Outfit", system-ui, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(184,79,212,.22), transparent 50%),
+        radial-gradient(900px 500px at 100% 0%, rgba(226,61,74,.16), transparent 45%),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .wrap { width: min(760px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 80px; }
+    header.hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(184,79,212,.15);
+      border: 1px solid rgba(184,79,212,.35);
+      color: #e9c4f5;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      line-height: 1.12;
+      letter-spacing: -.03em;
+      margin-bottom: 10px;
+    }
+    h1 span { color: #e9b3f7; }
+    .lead { color: var(--muted); font-size: 16.5px; max-width: 58ch; margin: 0 auto 18px; }
+    .thermo {
+      display: flex;
+      height: 10px;
+      border-radius: 99px;
+      overflow: hidden;
+      margin: 18px auto 8px;
+      max-width: 420px;
+    }
+    .thermo span { flex: 1; }
+    .thermo .a { background: var(--yellow); }
+    .thermo .b { background: var(--orange); }
+    .thermo .c { background: var(--red); }
+    .thermo .d { background: #7a1730; }
+    .thermo-labels {
+      display: flex;
+      justify-content: space-between;
+      max-width: 420px;
+      margin: 0 auto 22px;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), transparent 40%), var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 26px 24px;
+      box-shadow: var(--shadow);
+    }
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .bar {
+      height: 6px;
+      background: #2a1833;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 22px;
+    }
+    .bar > i {
+      display: block;
+      height: 100%;
+      width: 10%;
+      background: linear-gradient(90deg, var(--violet), var(--red));
+      border-radius: 99px;
+      transition: width .35s ease;
+    }
+    .q-kicker {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #d7a6e8;
+      margin-bottom: 8px;
+    }
+    .question { font-size: clamp(20px, 3.4vw, 26px); line-height: 1.25; margin-bottom: 18px; }
+    .opts { display: grid; gap: 10px; }
+    button.opt {
+      appearance: none;
+      width: 100%;
+      text-align: left;
+      background: var(--bg-soft);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    button.opt:hover:not(:disabled) {
+      transform: translateY(-1px);
+      border-color: rgba(233,179,247,.45);
+      background: #30193c;
+    }
+    button.opt:disabled { cursor: default; }
+    button.opt.correct {
+      border-color: rgba(61,214,140,.7);
+      background: rgba(61,214,140,.12);
+    }
+    button.opt.wrong {
+      border-color: rgba(255,107,122,.7);
+      background: rgba(255,107,122,.1);
+    }
+    button.opt.dim { opacity: .55; }
+    .explain {
+      display: none;
+      margin-top: 18px;
+      padding: 16px 16px 14px;
+      border-radius: 16px;
+      background: #23102c;
+      border: 1px solid var(--line);
+    }
+    .explain.show { display: block; }
+    .explain .tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+    .tag.si { background: rgba(226,61,74,.18); color: #ffb0b8; }
+    .tag.no { background: rgba(61,214,140,.16); color: #9cf0c4; }
+    .explain p { color: #eadff0; font-size: 15.5px; }
+    .explain .why { margin-top: 8px; color: var(--muted); font-size: 14.5px; }
+    .actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+    .btn {
+      appearance: none;
+      border: 0;
+      background: linear-gradient(90deg, #c45ee0, #e23d4a);
+      color: white;
+      font: inherit;
+      font-weight: 700;
+      padding: 12px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--ink);
+    }
+    .result { display: none; text-align: center; }
+    .result.show { display: block; }
+    .score {
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      line-height: 1;
+      margin: 8px 0 6px;
+    }
+    .score small { font-size: 22px; color: var(--muted); }
+    .resources {
+      margin-top: 22px;
+      text-align: left;
+      background: #2a1220;
+      border: 1px solid rgba(226,61,74,.28);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .resources h3 { font-size: 16px; margin-bottom: 8px; }
+    .resources ul { padding-left: 18px; color: #f3d6dc; font-size: 14.5px; }
+    .resources li { margin: 6px 0; }
+    .note {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: left;
+    }
+    footer {
+      margin-top: 26px;
+      color: #9b879f;
+      font-size: 13px;
+      text-align: center;
+    }
+    footer a { color: #e9b3f7; }
+    .levels {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0 6px;
+    }
+    .lvl {
+      display: grid;
+      grid-template-columns: 10px 1fr;
+      gap: 12px;
+      background: var(--bg-soft);
+      border-radius: 12px;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 14px;
+    }
+    .lvl b { display: block; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+    .dot { border-radius: 99px; }
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
-<p>Cargando versión completa… si ves esto, recarga.</p>
+  <div class="wrap">
+    <header class="hero">
+      <div class="badge">Herramienta educativa · IPN</div>
+      <h1>¿Está en el <span>Violentómetro</span>?</h1>
+      <p class="lead">10 preguntas con opciones para distinguir conductas que el Violentómetro del Instituto Politécnico Nacional reconoce como violencia… y las que no lo son.</p>
+      <div class="thermo" aria-hidden="true"><span class="a"></span><span class="b"></span><span class="c"></span><span class="d"></span></div>
+      <div class="thermo-labels"><span>Cuidado</span><span>Reacciona</span><span>Pide ayuda</span></div>
+    </header>
+
+    <section id="intro" class="card">
+      <p class="q-kicker">Antes de empezar</p>
+      <h2 class="question" style="font-size:22px">El Violentómetro no “mide amor”: nombra violencias que a veces se disfrazan de celos, juego o protección.</h2>
+      <p class="lead" style="margin:0 0 14px; text-align:left">Creado en 2009 por la Dra. Martha Alicia Tronco Rosas (IPN). Va de lo sutil a lo extremo. Las conductas no tienen que ir en orden: pueden aparecer mezcladas. Ningún nivel es “inofensivo”.</p>
+      <div class="levels">
+        <div class="lvl"><i class="dot" style="background:var(--yellow)"></i><div><b>Ten cuidado — la violencia aumentará</b> Bromas hirientes, chantaje, mentiras, ley del hielo, celos, descalificar, humillar, amenazar, controlar.</div></div>
+        <div class="lvl"><i class="dot" style="background:var(--orange)"></i><div><b>Reacciona — no te dejes destruir</b> Prohibir, destruir objetos, manosear, golpear “jugando”, pellizcar, empujar, cachetear, aislar.</div></div>
+        <div class="lvl"><i class="dot" style="background:var(--red)"></i><div><b>Necesitas ayuda profesional</b> Sextorsión, amenazas con armas o de muerte, forzar sexo, violación, mutilar, feminicidio.</div></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="startBtn">Empezar el quiz</button>
+      </div>
+    </section>
+
+    <section id="quiz" class="card hidden">
+      <div class="progress-row">
+        <span id="stepLabel">Pregunta 1 de 10</span>
+        <span id="liveScore">0 correctas</span>
+      </div>
+      <div class="bar"><i id="barFill"></i></div>
+      <p class="q-kicker" id="kicker">Pregunta 1</p>
+      <h2 class="question" id="qText"></h2>
+      <div class="opts" id="opts"></div>
+      <div class="explain" id="explain">
+        <span class="tag" id="expTag"></span>
+        <p id="expTitle"></p>
+        <p class="why" id="expWhy"></p>
+      </div>
+      <div class="actions">
+        <button class="btn" id="nextBtn" disabled>Siguiente</button>
+      </div>
+    </section>
+
+    <section id="result" class="card result">
+      <p class="q-kicker">Resultado</p>
+      <div class="score" id="finalScore">0 <small>/ 10</small></div>
+      <p class="lead" id="finalMsg" style="margin-bottom:8px"></p>
+      <div class="resources">
+        <h3>Si reconociste alguna de estas conductas, no estás sola / solo</h3>
+        <ul>
+          <li><strong>Emergencia en México:</strong> 911. En Jalisco puedes decir <em>“Código Violeta”</em>.</li>
+          <li><strong>Línea de las Mujeres:</strong> 079 (opción 1), orientación 24/7.</li>
+          <li><strong>Línea sin violencia:</strong> 800 108 40 53.</li>
+          <li><strong>Red Nacional de Refugios:</strong> 800 822 44 60.</li>
+          <li><strong>Jalisco / Zapopan–GDL:</strong> Instituto Jalisciense de las Mujeres e InMujeres municipal. En Guadalajara, DEAViM 33 1201 6598.</li>
+        </ul>
+      </div>
+      <p class="note">Esto es un material didáctico basado en el Violentómetro del IPN. No sustituye una evaluación profesional ni una denuncia. Las manifestaciones no son necesariamente consecutivas.</p>
+      <div class="actions" style="justify-content:center; gap:10px; margin-top:18px">
+        <button class="btn ghost" id="retryBtn">Volver a intentar</button>
+      </div>
+    </section>
+
+    <footer>
+      Fuente pedagógica: Violentómetro, Unidad Politécnica de Gestión con Perspectiva de Género, IPN.<br />
+      Material sin fines de lucro, para identificar violencia cotidiana (incluidas formas digitales).
+    </footer>
+  </div>
+
+  <script>
+    const QUESTIONS = [
+      {
+        q: "Tu pareja revisa tu celular, tus redes y te pregunta a cada rato con quién hablas “porque te quiere y se pone celoso/a”. ¿Eso está en el Violentómetro?",
+        options: [
+          { t: "Sí, está: celos + control / acecho digital", ok: true },
+          { t: "No: los celos son una prueba de amor", ok: false },
+          { t: "Solo está si también hay golpes", ok: false },
+          { t: "Está, pero solo si lo hace en público", ok: false }
+        ],
+        tag: "sí",
+        title: "Sí está. Celar, controlar y acechar redes aparecen desde los primeros tramos.",
+        why: "El Violentómetro incluye celos, controlar/prohibir (celular, mails, redes, amistades) y acechar/stalkear. Se disfraza de “protección”, pero quita autonomía. No hace falta que haya golpes para que ya sea violencia."
+      },
+      {
+        q: "Después de un desacuerdo, ambos hablan con respeto, se piden disculpas y acuerdan un cambio. ¿Eso está en el Violentómetro?",
+        options: [
+          { t: "Sí, discutir siempre es violencia", ok: false },
+          { t: "No: es conflicto resuelto con respeto", ok: true },
+          { t: "Sí, porque hubo enojo", ok: false },
+          { t: "Solo no está si nunca vuelven a discutir", ok: false }
+        ],
+        tag: "no",
+        title: "No está. Una discusión respetuosa no es violencia.",
+        why: "El Violentómetro nombra humillar, descalificar, intimidar, chantajear o aplicar la ley del hielo. No nombra el desacuerdo adulto. Enojo ≠ violencia. Violencia es usar el poder para lastimar, controlar o callar a la otra persona."
+      },
+      {
+        q: "Frente a amistades, tu pareja “bromea” con que estás gordo/a, tonto/a o que “nadie más te aguantaría”. ¿Está en el Violentómetro?",
+        options: [
+          { t: "No, si se ríe y dice que es broma", ok: false },
+          { t: "Solo si te lo dice todos los días", ok: false },
+          { t: "Sí: bromas hirientes, ridiculizar y humillar en público", ok: true },
+          { t: "No, porque no hubo contacto físico", ok: false }
+        ],
+        tag: "sí",
+        title: "Sí está. Bromas hirientes, ridiculizar, ofender y humillar en público están al inicio de la escala.",
+        why: "“Era broma” no lo saca del Violentómetro. Esa violencia psicológica desvaloriza y prepara el terreno para que después se normalicen agresiones más graves. La ausencia de golpes no la vuelve inofensiva."
+      },
+      {
+        q: "Te pellizca, te da topes o te “pega de a jueguito” y luego dice que es cariño. ¿Está en el Violentómetro?",
+        options: [
+          { t: "No, el juego no cuenta", ok: false },
+          { t: "Sí: golpear “jugando”, pellizcar, caricias agresivas", ok: true },
+          { t: "Solo si deja moretón", ok: false },
+          { t: "Está, pero en el nivel más bajo y se puede ignorar", ok: false }
+        ],
+        tag: "sí",
+        title: "Sí está. “Golpear jugando”, pellizcar, arañar y caricias agresivas están en la zona de reaccionar.",
+        why: "El IPN documentó que mucha gente no reconoce estas agresiones porque las vive como juego o coqueteo. El cuerpo no es un objeto de ensayo. Si duele, intimida o se impone, ya no es juego: es violencia física."
+      },
+      {
+        q: "Te dice que no puedes salir con cierta amiga, vestirte de cierta forma ni manejar tu propio dinero “por tu bien”. ¿Está?",
+        options: [
+          { t: "No: es cuidado y previsión", ok: false },
+          { t: "Solo está si te encierra bajo llave", ok: false },
+          { t: "Sí: controlar y prohibir (amistades, ropa, dinero, lugares)", ok: true },
+          { t: "No, porque tú podrías “hacerle caso por amor”", ok: false }
+        ],
+        tag: "sí",
+        title: "Sí está. Controlar y prohibir es uno de los puntos más claros del Violentómetro.",
+        why: "La regla nombra expresamente controlar/prohibir amistades, familia, dinero, lugares, apariencia, actividades, celular y redes. Cuando tú ya no decides sobre tu vida, hay violencia aunque “sea por tu bien”."
+      },
+      {
+        q: "Estás enojado/a, pides un par de horas para calmarte y luego regresas a hablar. ¿Eso es “ley del hielo” y por lo tanto está en el Violentómetro?",
+        options: [
+          { t: "Sí, cualquier silencio es violencia", ok: false },
+          { t: "No: un límite temporal para hablar después no es ley del hielo", ok: true },
+          { t: "Sí, porque la otra persona se queda esperando", ok: false },
+          { t: "Solo no está si avisas por escrito ante un juez", ok: false }
+        ],
+        tag: "no",
+        title: "No está. Pedir espacio con un regreso acordado no es la ley del hielo.",
+        why: "La ley del hielo del Violentómetro es ignorar, castigar con el silencio y dejar a la persona sin explicación durante horas o días para controlar. Un “necesito calmarme y hablamos a las 8” es un límite. El castigo silencioso, no."
+      },
+      {
+        q: "Llevas tres días sin que te hable, te bloquea y luego actúa como si no hubiera pasado nada. ¿Está en el Violentómetro?",
+        options: [
+          { t: "Sí: ignorar / ley del hielo", ok: true },
+          { t: "No, cada quien maneja el enojo como puede", ok: false },
+          { t: "Solo está si también te grita", ok: false },
+          { t: "No, el silencio nunca es violencia", ok: false }
+        ],
+        tag: "sí",
+        title: "Sí está. Ignorar y la ley del hielo están en el primer tramo: “ten cuidado, la violencia aumentará”.",
+        why: "No es “necesito espacio”: es un castigo emocional. Busca que pidas perdón aunque no sepas de qué, y entrena a la otra persona a caminar en huevos. Es violencia psicológica aunque no haya un golpe."
+      },
+      {
+        q: "Amenaza con publicar tus fotos o chats íntimos si lo dejas o si no haces lo que pide. ¿Está en el Violentómetro?",
+        options: [
+          { t: "No, porque “las fotos ya se las diste”", ok: false },
+          { t: "Sí: sextorsión y difundir contenido íntimo sin consentimiento", ok: true },
+          { t: "Solo está si las publica de verdad", ok: false },
+          { t: "No: eso es un tema de redes, no de violencia de pareja", ok: false }
+        ],
+        tag: "sí",
+        title: "Sí está, en la zona roja. Además puede constituir un delito (Ley Olimpia).",
+        why: "Las versiones actualizadas del Violentómetro (IPN) incorporan violencias digitales: sextorsión y difundir contenido íntimo sin consentimiento. La amenaza ya es violencia. El consentimiento para una foto no es consentimiento para exhibirte."
+      },
+      {
+        q: "Tu pareja te acompaña al médico porque se lo pediste, te pregunta cómo estás y respeta si dices que hoy quieres estar sola. ¿Eso está en el Violentómetro?",
+        options: [
+          { t: "Sí, prestar tanta atención ya es control", ok: false },
+          { t: "No: es cuidado mutuo y respeto a límites", ok: true },
+          { t: "Sí, porque hay dependencia emocional", ok: false },
+          { t: "Solo no está si nunca se enoja", ok: false }
+        ],
+        tag: "no",
+        title: "No está. Cuidar con consentimiento no es vigilancia.",
+        why: "El Violentómetro señala control, prohibición, acecho y aislamiento. Acompañar cuando la otra persona lo pide, preguntar y aceptar un “hoy no” es vínculo sano. La diferencia clave: ¿puedes decir que no sin castigo?"
+      },
+      {
+        q: "Si dices que te quieres ir, responde: “si me dejas me mato” o “te quito a los hijos / te dejo en la calle”. ¿Está en el Violentómetro?",
+        options: [
+          { t: "No, es desesperación, no violencia", ok: false },
+          { t: "Sí: chantajear, intimidar y amenazar", ok: true },
+          { t: "Solo está la amenaza de quitar a los hijos, no la de suicidio", ok: false },
+          { t: "No, porque todavía no hace nada físico", ok: false }
+        ],
+        tag: "sí",
+        title: "Sí está. Chantajear, intimidar y amenazar están en la escala; las amenazas graves suben a “pide ayuda”.",
+        why: "El chantaje emocional usa el miedo (a la culpa, a la pobreza, a los hijos, a que la otra persona se haga daño) para impedir que te vayas. Eso no es amor desesperado: es control. Si hay riesgo real de daño, pide ayuda profesional para ambas partes; no te quedes por la amenaza."
+      }
+    ];
+
+    const intro = document.getElementById("intro");
+    const quiz = document.getElementById("quiz");
+    const result = document.getElementById("result");
+    const qText = document.getElementById("qText");
+    const optsEl = document.getElementById("opts");
+    const explain = document.getElementById("explain");
+    const expTag = document.getElementById("expTag");
+    const expTitle = document.getElementById("expTitle");
+    const expWhy = document.getElementById("expWhy");
+    const nextBtn = document.getElementById("nextBtn");
+    const stepLabel = document.getElementById("stepLabel");
+    const liveScore = document.getElementById("liveScore");
+    const barFill = document.getElementById("barFill");
+    const kicker = document.getElementById("kicker");
+
+    let i = 0;
+    let score = 0;
+    let answered = false;
+
+    document.getElementById("startBtn").onclick = () => {
+      intro.classList.add("hidden");
+      quiz.classList.remove("hidden");
+      render();
+    };
+    document.getElementById("retryBtn").onclick = () => {
+      i = 0; score = 0; answered = false;
+      result.classList.remove("show");
+      quiz.classList.remove("hidden");
+      render();
+    };
+    nextBtn.onclick = () => {
+      if (!answered) return;
+      i += 1;
+      if (i >= QUESTIONS.length) finish();
+      else render();
+    };
+
+    function render() {
+      const item = QUESTIONS[i];
+      answered = false;
+      nextBtn.disabled = true;
+      nextBtn.textContent = i === QUESTIONS.length - 1 ? "Ver resultado" : "Siguiente";
+      stepLabel.textContent = `Pregunta ${i + 1} de ${QUESTIONS.length}`;
+      liveScore.textContent = `${score} correcta${score === 1 ? "" : "s"}`;
+      barFill.style.width = `${((i) / QUESTIONS.length) * 100}%`;
+      kicker.textContent = `Pregunta ${i + 1}`;
+      qText.textContent = item.q;
+      explain.classList.remove("show");
+      optsEl.innerHTML = "";
+      item.options.forEach((opt, idx) => {
+        const b = document.createElement("button");
+        b.className = "opt";
+        b.type = "button";
+        b.textContent = opt.t;
+        b.onclick = () => choose(idx);
+        optsEl.appendChild(b);
+      });
+    }
+
+    function choose(idx) {
+      if (answered) return;
+      answered = true;
+      const item = QUESTIONS[i];
+      const buttons = [...optsEl.querySelectorAll("button")];
+      buttons.forEach((b, n) => {
+        b.disabled = true;
+        if (item.options[n].ok) b.classList.add("correct");
+        else if (n === idx) b.classList.add("wrong");
+        else b.classList.add("dim");
+      });
+      if (item.options[idx].ok) score += 1;
+      expTag.textContent = item.tag === "sí" ? "Sí está en el Violentómetro" : "No está en el Violentómetro";
+      expTag.className = "tag " + (item.tag === "sí" ? "si" : "no");
+      expTitle.textContent = item.title;
+      expWhy.textContent = "Por qué: " + item.why;
+      explain.classList.add("show");
+      nextBtn.disabled = false;
+      liveScore.textContent = `${score} correcta${score === 1 ? "" : "s"}`;
+      barFill.style.width = `${((i + 1) / QUESTIONS.length) * 100}%`;
+    }
+
+    function finish() {
+      quiz.classList.add("hidden");
+      result.classList.add("show");
+      document.getElementById("finalScore").innerHTML = `${score} <small>/ 10</small>`;
+      const msg = document.getElementById("finalMsg");
+      if (score >= 9) msg.textContent = "Muy claro el mapa: sabes separar cuidado de control. Compártelo; mucha gente todavía llama “amor” a lo que ya es violencia.";
+      else if (score >= 6) msg.textContent = "Vas bien. El truco del Violentómetro es precisamente lo que se normaliza: bromas, celos, “juego” y silencio-castigo.";
+      else msg.textContent = "Justo por eso existe la regla: varias de estas conductas se enseñan como romance. Revisa las explicaciones; identificarlas a tiempo salva.";
+    }
+  </script>
 </body>
 </html>
